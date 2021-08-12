@@ -23,6 +23,10 @@ namespace Infrastructure
             return await _context.Set<T>().FirstOrDefaultAsync();
         }
 
+        public async Task<int> CountAsync(ISpecification<T> specification)
+        {
+            return await ApplySpecification(specification).CountAsync();
+        }
         public async Task<IReadOnlyList<T>> ListAllAsync()
         {
             return await _context.Set<T>().ToListAsync();
@@ -37,6 +41,7 @@ namespace Infrastructure
         {
             return await ApplySpecification(specification).ToListAsync();
         }
+        
 
         private IQueryable<T> ApplySpecification(ISpecification<T> specification)
         {
