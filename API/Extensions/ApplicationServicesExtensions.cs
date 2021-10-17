@@ -1,5 +1,7 @@
 using System.Linq;
 using API.Errors;
+using API.Helpers;
+using API.Interfaces;
 using Core.Interfaces;
 using Infrastructure;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +14,7 @@ namespace API.Extensions
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IPayments, PaymentsHelper>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.Configure<ApiBehaviorOptions>(options =>
             {

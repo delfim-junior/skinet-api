@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Dtos;
 using API.Errors;
 using API.Helpers;
+using API.Interfaces;
 using AutoMapper;
 using BrunoZell.ModelBinding;
 using Core.Entities;
@@ -34,16 +35,19 @@ namespace API.Controllers
         private readonly IGenericRepository<ProductType> _productTypeRepository;
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
+        private readonly IPayments _payments;
 
         public ProductsController(IGenericRepository<Product> productRepository,
             IGenericRepository<ProductBrand> productBrandRepository,
-            IGenericRepository<ProductType> productTypeRepository, IMapper mapper, IConfiguration configuration)
+            IGenericRepository<ProductType> productTypeRepository, IMapper mapper, IConfiguration configuration,
+            IPayments payments)
         {
             _productRepository = productRepository;
             _productBrandRepository = productBrandRepository;
             _productTypeRepository = productTypeRepository;
             _mapper = mapper;
             _configuration = configuration;
+            _payments = payments;
         }
 
         // [HttpGet]
@@ -106,38 +110,8 @@ namespace API.Controllers
         [HttpPost("pay")]
         public async Task<ActionResult<PaymentRequest>> PayBasket([FromBody] PaymentRequest paymentReq)
         {
-            var client = new Client.Builder()
-                .ApiKey(_configuration["ApiKey"])
-                .PublicKey(_configuration["PublicKey"])
-                .ServiceProviderCode("171717")
-                .InitiatorIdentifier("SJGW67fK")
-                .Environment(Environment.Development)
-                .SecurityCredential("Mpesa2019")
-                .Build();
-            
-            
-            
-            //C2B
-            var paymentRequest = new Request.Builder()
-                .Amount(paymentReq.TotalPrice)
-                .From($"258{paymentReq.PhoneNumber}")
-                .Reference(RandomStringGenerator.GetString())
-                .Transaction("T12344A")
-                .Build();
-
-            try
-            {
-                var response = await client.Receive(paymentRequest);
-                
-                return response.IsSuccessfully ? paymentReq : null;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw new Exception(e.Message);
-            }
-
-            
+            var response = await _payments.DoC2B(paymentReq);
+            return response.IsSuccessfully ? paymentReq : null;
         }
     }
 }
