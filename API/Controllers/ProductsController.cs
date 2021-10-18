@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using API.Dtos;
@@ -57,13 +58,14 @@ namespace API.Controllers
         //     return Ok(products);
         // }
 
+        /*
         [HttpPost]
         public async Task<ActionResult<object>> Upload([ModelBinder(BinderType = typeof(JsonModelBinder))]
             RequestExample command,
             [FromForm] IList<IFormFile> files)
         {
             return Ok();
-        }
+        }*/
 
 
         [HttpGet]
@@ -111,7 +113,7 @@ namespace API.Controllers
         public async Task<ActionResult<PaymentRequest>> PayBasket([FromBody] PaymentRequest paymentReq)
         {
             var response = await _payments.DoC2B(paymentReq);
-            return response.IsSuccessfully ? paymentReq : null;
+            return response.IsSuccessfully ? paymentReq : Ok(new ApiException(int.Parse(response.Code), response.Description));
         }
     }
 }
